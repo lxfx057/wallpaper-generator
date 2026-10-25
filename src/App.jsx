@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { DEVICES } from './constants/devices';
+import { DEVICES } from './devices';
 import { Download, Palette, Brush, RefreshCw, Smartphone } from 'lucide-react';
 
 export default function App() {
