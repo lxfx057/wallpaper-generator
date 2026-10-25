@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Download, Sparkles, Smartphone, Laptop, Tablet, ArrowLeft, Palette, Sliders, Layers } from 'lucide-react';
+import { Download, Sparkles, Smartphone, Laptop, Tablet, ArrowLeft, Palette, Sliders, X } from 'lucide-react';
 
 const DEVICES = [
   // --- iPhone ---
@@ -43,6 +43,8 @@ export default function App() {
   const [brushSize, setBrushSize] = useState(24);
   const [isDrawing, setIsDrawing] = useState(false);
   const [activeTab, setActiveTab] = useState('style');
+
+  const [exportUrl, setExportUrl] = useState(null);
 
   const canvasRef = useRef(null);
 
@@ -221,19 +223,10 @@ export default function App() {
 
   const stopDrawing = () => setIsDrawing(false);
 
-  // Trigger diretto del download file su iOS e browser moderni
-  const downloadWallpaper = () => {
+  const handleOpenExport = () => {
     const canvas = canvasRef.current;
-    canvas.toBlob((blob) => {
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Apple-Wallpaper-${selectedDevice.id}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    }, 'image/png');
+    const dataUrl = canvas.toDataURL('image/png');
+    setExportUrl(dataUrl);
   };
 
   return (
@@ -264,12 +257,45 @@ export default function App() {
         }
       `}</style>
 
+      {/* MODALE DI DOWNLOAD CON SUGGERIMENTO ESPLICITO PER iOS */}
+      {exportUrl && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(20px)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
+            <button onClick={() => setExportUrl(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <X size={20} />
+            </button>
+          </div>
+
+          <div style={{ maxWidth: '400px', width: '100%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h3 style={{ fontSize: '20px', fontWeight: 600, margin: 0 }}>Your Wallpaper is Ready</h3>
+            
+            {/* Box Suggerimento iOS in evidenza */}
+            <div style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '12px 16px', borderRadius: '12px', fontSize: '13px', color: '#38bdf8', lineHeight: '1.4' }}>
+              💡 <b>Suggerimento iOS:</b> Tieni premuto a lungo sulla foto qui sotto e seleziona <b>"Aggiungi a Foto"</b> o <b>"Salva in File"</b>.
+            </div>
+
+            <div style={{ maxHeight: '45vh', overflow: 'hidden', borderRadius: '20px', border: '2px solid rgba(255,255,255,0.2)', boxShadow: '0 20px 40px rgba(0,0,0,0.8)' }}>
+              <img src={exportUrl} alt="Generated Wallpaper" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            </div>
+
+            <a 
+              href={exportUrl} 
+              download={`Apple-Wallpaper-${selectedDevice.id}.png`}
+              className="btn-apple"
+              style={{ padding: '14px 24px', fontSize: '15px', textDecoration: 'none', display: 'block', textAlign: 'center' }}
+            >
+              Direct Download File (.png)
+            </a>
+          </div>
+        </div>
+      )}
+
       {!selectedDevice ? (
         <div className="animate-fade" style={{ maxWidth: '1100px', margin: '0 auto', padding: '60px 24px 80px' }}>
           
           <div style={{ textAlign: 'center', marginBottom: '56px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '980px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '20px', fontSize: '13px', color: '#86868b' }}>
-              <Sparkles size={14} color="#38bdf8" /> 10+ Pro Effects & Direct File Export
+              <Sparkles size={14} color="#38bdf8" /> 10+ Pro Effects & Instant Save
             </div>
             <h1 style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: 700, letterSpacing: '-0.03em', margin: '0 0 16px', background: 'linear-gradient(180deg, #FFFFFF 0%, #86868B 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Wallpaper Studio Pro
@@ -358,4 +384,187 @@ export default function App() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     style={{
-                      display: 'flex', alignItems: 'center', gap:
+                      display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '980px', border: 'none',
+                      background: isActive ? '#ffffff' : 'transparent', color: isActive ? '#000000' : '#86868b',
+                      fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
+                    }}
+                  >
+                    <Icon size={14} /> {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button onClick={handleOpenExport} className="btn-apple" style={{ padding: '8px 20px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: 'none' }}>
+              <Download size={16} /> Save 8K
+            </button>
+          </header>
+
+          <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+            
+            <aside className="glass-panel" style={{ width: '360px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto' }}>
+              
+              {activeTab === 'style' && (
+                <>
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
+                      Style Mode
+                    </label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+                      {['solid', 'linear', 'mesh'].map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => setBgStyle(s)}
+                          style={{
+                            padding: '10px 0', borderRadius: '12px',
+                            border: bgStyle === s ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.08)',
+                            background: bgStyle === s ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255,255,255,0.03)',
+                            color: bgStyle === s ? '#38bdf8' : '#f5f5f7', fontSize: '13px', fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize'
+                          }}
+                        >
+                          {s}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
+                      Presets
+                    </label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {PRESET_PALETTES.map((p) => (
+                        <button
+                          key={p.name}
+                          onClick={() => applyPalette(p)}
+                          style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: '12px',
+                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer'
+                          }}
+                        >
+                          <span style={{ fontSize: '13px', color: '#f5f5f7' }}>{p.name}</span>
+                          <div style={{ display: 'flex', gap: '4px' }}>
+                            <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: p.c1 }} />
+                            <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: p.c2 }} />
+                            <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: p.c3 }} />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
+                      Color Nodes
+                    </label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <input type="color" value={color1} onChange={(e) => setColor1(e.target.value)} style={{ flex: 1, height: '38px', borderRadius: '8px', border: 'none', background: 'transparent', cursor: 'pointer' }} />
+                      {bgStyle !== 'solid' && <input type="color" value={color2} onChange={(e) => setColor2(e.target.value)} style={{ flex: 1, height: '38px', borderRadius: '8px', border: 'none', background: 'transparent', cursor: 'pointer' }} />}
+                      {bgStyle === 'mesh' && <input type="color" value={color3} onChange={(e) => setColor3(e.target.value)} style={{ flex: 1, height: '38px', borderRadius: '8px', border: 'none', background: 'transparent', cursor: 'pointer' }} />}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {activeTab === 'effects' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
+                  <div>
+                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
+                      Select Effect (10 Pro Options)
+                    </label>
+                    <select
+                      value={effectType}
+                      onChange={(e) => setEffectType(e.target.value)}
+                      style={{
+                        width: '100%', padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '14px', outline: 'none', cursor: 'pointer'
+                      }}
+                    >
+                      <option value="glow" style={{ background: '#111' }}>1. Ambient Center Glow</option>
+                      <option value="waves" style={{ background: '#111' }}>2. macOS Liquid Waves</option>
+                      <option value="dots" style={{ background: '#111' }}>3. Retina Dot Matrix</option>
+                      <option value="aurora" style={{ background: '#111' }}>4. Aurora Borealis</option>
+                      <option value="prisms" style={{ background: '#111' }}>5. Glass Prisms Rings</option>
+                      <option value="noise" style={{ background: '#111' }}>6. Cosmic Grain Noise</option>
+                      <option value="cyber" style={{ background: '#111' }}>7. Cyber Neon Frame</option>
+                      <option value="stars" style={{ background: '#111' }}>8. Deep Starfield</option>
+                      <option value="flare" style={{ background: '#111' }}>9. Solar Flare Light</option>
+                      <option value="none" style={{ background: '#111' }}>10. Clean Minimal (None)</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 600, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Sliders size={14} /> Spider Controls
+                    </div>
+
+                    <label style={{ fontSize: '12px', color: '#86868b', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      Effect Intensity: {effectIntensity}%
+                      <input 
+                        type="range" min="10" max="100" value={effectIntensity} 
+                        onChange={(e) => setEffectIntensity(Number(e.target.value))} 
+                        style={{ accentColor: '#38bdf8', cursor: 'pointer' }} 
+                      />
+                    </label>
+
+                    <label style={{ fontSize: '12px', color: '#86868b', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                      Effect Scale / Spread: {effectScale}%
+                      <input 
+                        type="range" min="10" max="100" value={effectScale} 
+                        onChange={(e) => setEffectScale(Number(e.target.value))} 
+                        style={{ accentColor: '#38bdf8', cursor: 'pointer' }} 
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'draw' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                  <label style={{ fontSize: '12px', color: '#86868b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    Brush Color
+                    <input type="color" value={brushColor} onChange={(e) => setBrushColor(e.target.value)} style={{ width: '32px', height: '32px', borderRadius: '50%', border: 'none', cursor: 'pointer' }} />
+                  </label>
+
+                  <label style={{ fontSize: '12px', color: '#86868b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    Brush Size ({brushSize}px)
+                    <input type="range" min="4" max="80" value={brushSize} onChange={(e) => setBrushSize(Number(e.target.value))} style={{ accentColor: '#38bdf8' }} />
+                  </label>
+                </div>
+              )}
+
+            </aside>
+
+            <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', background: 'radial-gradient(circle at center, rgba(30, 30, 35, 1) 0%, rgba(0,0,0,1) 100%)', position: 'relative' }}>
+              <div 
+                style={{
+                  position: 'relative', maxHeight: '75vh', aspectRatio: selectedDevice.aspect,
+                  borderRadius: selectedDevice.type === 'phone' ? '48px' : selectedDevice.type === 'tablet' ? '28px' : '16px',
+                  border: '8px solid #27272a', boxShadow: '0 25px 80px rgba(0, 0, 0, 0.9), 0 0 40px rgba(56, 189, 248, 0.1)',
+                  overflow: 'hidden', background: '#000000'
+                }}
+              >
+                {selectedDevice.type === 'phone' && (
+                  <div style={{ position: 'absolute', top: '12px', left: '50%', transform: 'translateX(-50%)', width: '90px', height: '24px', background: '#000000', borderRadius: '20px', zIndex: 20 }} />
+                )}
+                <canvas
+                  ref={canvasRef}
+                  onMouseDown={startDrawing}
+                  onMouseMove={draw}
+                  onMouseUp={stopDrawing}
+                  onMouseLeave={stopDrawing}
+                  onTouchStart={(e) => startDrawing(e.touches[0])}
+                  onTouchMove={(e) => draw(e.touches[0])}
+                  onTouchEnd={stopDrawing}
+                  style={{ width: '100%', height: '100%', display: 'block', cursor: activeTab === 'draw' ? 'crosshair' : 'default', touchAction: 'none' }}
+                />
+              </div>
+            </main>
+
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
