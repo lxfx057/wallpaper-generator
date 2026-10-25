@@ -257,35 +257,27 @@ export default function App() {
         }
       `}</style>
 
-      {/* MODALE DI DOWNLOAD CON SUGGERIMENTO ESPLICITO PER iOS */}
+      {/* MODALE DI SALVATAGGIO OTTIMIZZATO PER iOS */}
       {exportUrl && (
-        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.9)', backdropFilter: 'blur(20px)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.92)', backdropFilter: 'blur(20px)', zIndex: 100, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
           <div style={{ position: 'absolute', top: '24px', right: '24px' }}>
             <button onClick={() => setExportUrl(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <X size={20} />
             </button>
           </div>
 
-          <div style={{ maxWidth: '400px', width: '100%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <h3 style={{ fontSize: '20px', fontWeight: 600, margin: 0 }}>Your Wallpaper is Ready</h3>
+          <div style={{ maxWidth: '360px', width: '100%', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 600, margin: 0 }}>Save Your Wallpaper</h3>
             
-            {/* Box Suggerimento iOS in evidenza */}
-            <div style={{ background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '12px 16px', borderRadius: '12px', fontSize: '13px', color: '#38bdf8', lineHeight: '1.4' }}>
-              💡 <b>Suggerimento iOS:</b> Tieni premuto a lungo sulla foto qui sotto e seleziona <b>"Aggiungi a Foto"</b> o <b>"Salva in File"</b>.
+            {/* Box Suggerimento iOS esplicito */}
+            <div style={{ background: 'rgba(56, 189, 248, 0.12)', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '10px 14px', borderRadius: '12px', fontSize: '12px', color: '#38bdf8', lineHeight: '1.4' }}>
+              💡 <b>Suggerimento:</b> Tieni premuto a lungo sulla foto qui sotto e seleziona <b>"Aggiungi a Foto"</b> o <b>"Salva in File"</b>.
             </div>
 
-            <div style={{ maxHeight: '45vh', overflow: 'hidden', borderRadius: '20px', border: '2px solid rgba(255,255,255,0.2)', boxShadow: '0 20px 40px rgba(0,0,0,0.8)' }}>
-              <img src={exportUrl} alt="Generated Wallpaper" style={{ width: '100%', height: 'auto', display: 'block' }} />
+            {/* Contenitore con proporzioni bloccate per evitare deformazioni */}
+            <div style={{ width: '100%', maxHeight: '55vh', display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'hidden', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)', background: '#111' }}>
+              <img src={exportUrl} alt="Generated Wallpaper" style={{ maxWidth: '100%', maxHeight: '55vh', objectFit: 'contain', display: 'block' }} />
             </div>
-
-            <a 
-              href={exportUrl} 
-              download={`Apple-Wallpaper-${selectedDevice.id}.png`}
-              className="btn-apple"
-              style={{ padding: '14px 24px', fontSize: '15px', textDecoration: 'none', display: 'block', textAlign: 'center' }}
-            >
-              Direct Download File (.png)
-            </a>
           </div>
         </div>
       )}
