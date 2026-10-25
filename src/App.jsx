@@ -30,22 +30,19 @@ const PRESET_PALETTES = [
 export default function App() {
   const [selectedDevice, setSelectedDevice] = useState(null);
   
-  // Design Parameters
-  const [bgStyle, setBgStyle] = useState('mesh'); // 'solid', 'linear', 'mesh'
+  const [bgStyle, setBgStyle] = useState('mesh');
   const [color1, setColor1] = useState('#0f172a');
   const [color2, setColor2] = useState('#38bdf8');
   const [color3, setColor3] = useState('#818cf8');
   
-  // 10 Effects & Sliders (Spider)
   const [effectType, setEffectType] = useState('glow'); 
-  const [effectIntensity, setEffectIntensity] = useState(50); // Slider 1
-  const [effectScale, setEffectScale] = useState(50);         // Slider 2
+  const [effectIntensity, setEffectIntensity] = useState(50);
+  const [effectScale, setEffectScale] = useState(50);
   
-  // Brush Tool
   const [brushColor, setBrushColor] = useState('#ffffff');
   const [brushSize, setBrushSize] = useState(24);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [activeTab, setActiveTab] = useState('style'); // 'style', 'effects', 'draw'
+  const [activeTab, setActiveTab] = useState('style');
 
   const canvasRef = useRef(null);
 
@@ -55,7 +52,6 @@ export default function App() {
     setColor3(p.c3);
   };
 
-  // Advanced Render Engine with 10 Effects & Sliders
   useEffect(() => {
     if (!selectedDevice) return;
     const canvas = canvasRef.current;
@@ -65,7 +61,6 @@ export default function App() {
     canvas.height = selectedDevice.height;
     const ctx = canvas.getContext('2d');
 
-    // 1. Base Background Render
     if (bgStyle === 'solid') {
       ctx.fillStyle = color1;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -99,7 +94,6 @@ export default function App() {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // 2. 10 Procedural Effects Controlled by Sliders
     const alpha = effectIntensity / 100;
 
     if (effectType === 'glow') {
@@ -196,7 +190,6 @@ export default function App() {
 
   }, [selectedDevice, bgStyle, color1, color2, color3, effectType, effectIntensity, effectScale]);
 
-  // Freehand Drawing
   const startDrawing = (e) => {
     if (activeTab !== 'draw') return;
     const canvas = canvasRef.current;
@@ -228,13 +221,19 @@ export default function App() {
 
   const stopDrawing = () => setIsDrawing(false);
 
+  // Trigger diretto del download file su iOS e browser moderni
   const downloadWallpaper = () => {
     const canvas = canvasRef.current;
-    const imageURI = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.download = `Apple-Wallpaper-${selectedDevice.id}.png`;
-    link.href = imageURI;
-    link.click();
+    canvas.toBlob((blob) => {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Apple-Wallpaper-${selectedDevice.id}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 'image/png');
   };
 
   return (
@@ -270,7 +269,7 @@ export default function App() {
           
           <div style={{ textAlign: 'center', marginBottom: '56px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '980px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '20px', fontSize: '13px', color: '#86868b' }}>
-              <Sparkles size={14} color="#38bdf8" /> 10+ Pro Effects & Custom Sliders
+              <Sparkles size={14} color="#38bdf8" /> 10+ Pro Effects & Direct File Export
             </div>
             <h1 style={{ fontSize: 'clamp(36px, 6vw, 64px)', fontWeight: 700, letterSpacing: '-0.03em', margin: '0 0 16px', background: 'linear-gradient(180deg, #FFFFFF 0%, #86868B 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Wallpaper Studio Pro
@@ -359,188 +358,4 @@ export default function App() {
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 14px', borderRadius: '980px', border: 'none',
-                      background: isActive ? '#ffffff' : 'transparent', color: isActive ? '#000000' : '#86868b',
-                      fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s'
-                    }}
-                  >
-                    <Icon size={14} /> {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <button onClick={downloadWallpaper} className="btn-apple" style={{ padding: '8px 20px', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', border: 'none' }}>
-              <Download size={16} /> Save 8K
-            </button>
-          </header>
-
-          <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-            
-            <aside className="glass-panel" style={{ width: '360px', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', overflowY: 'auto' }}>
-              
-              {activeTab === 'style' && (
-                <>
-                  <div>
-                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
-                      Style Mode
-                    </label>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                      {['solid', 'linear', 'mesh'].map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => setBgStyle(s)}
-                          style={{
-                            padding: '10px 0', borderRadius: '12px',
-                            border: bgStyle === s ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.08)',
-                            background: bgStyle === s ? 'rgba(56, 189, 248, 0.15)' : 'rgba(255,255,255,0.03)',
-                            color: bgStyle === s ? '#38bdf8' : '#f5f5f7', fontSize: '13px', fontWeight: 500, cursor: 'pointer', textTransform: 'capitalize'
-                          }}
-                        >
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
-                      Presets
-                    </label>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {PRESET_PALETTES.map((p) => (
-                        <button
-                          key={p.name}
-                          onClick={() => applyPalette(p)}
-                          style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: '12px',
-                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', cursor: 'pointer'
-                          }}
-                        >
-                          <span style={{ fontSize: '13px', color: '#f5f5f7' }}>{p.name}</span>
-                          <div style={{ display: 'flex', gap: '4px' }}>
-                            <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: p.c1 }} />
-                            <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: p.c2 }} />
-                            <div style={{ width: '14px', height: '14px', borderRadius: '50%', background: p.c3 }} />
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
-                      Color Nodes
-                    </label>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <input type="color" value={color1} onChange={(e) => setColor1(e.target.value)} style={{ flex: 1, height: '38px', borderRadius: '8px', border: 'none', background: 'transparent', cursor: 'pointer' }} />
-                      {bgStyle !== 'solid' && <input type="color" value={color2} onChange={(e) => setColor2(e.target.value)} style={{ flex: 1, height: '38px', borderRadius: '8px', border: 'none', background: 'transparent', cursor: 'pointer' }} />}
-                      {bgStyle === 'mesh' && <input type="color" value={color3} onChange={(e) => setColor3(e.target.value)} style={{ flex: 1, height: '38px', borderRadius: '8px', border: 'none', background: 'transparent', cursor: 'pointer' }} />}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {activeTab === 'effects' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-                  <div>
-                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#86868b', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
-                      Select Effect (10 Pro Options)
-                    </label>
-                    <select
-                      value={effectType}
-                      onChange={(e) => setEffectType(e.target.value)}
-                      style={{
-                        width: '100%', padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '14px', outline: 'none', cursor: 'pointer'
-                      }}
-                    >
-                      <option value="glow" style={{ background: '#111' }}>1. Ambient Center Glow</option>
-                      <option value="waves" style={{ background: '#111' }}>2. macOS Liquid Waves</option>
-                      <option value="dots" style={{ background: '#111' }}>3. Retina Dot Matrix</option>
-                      <option value="aurora" style={{ background: '#111' }}>4. Aurora Borealis</option>
-                      <option value="prisms" style={{ background: '#111' }}>5. Glass Prisms Rings</option>
-                      <option value="noise" style={{ background: '#111' }}>6. Cosmic Grain Noise</option>
-                      <option value="cyber" style={{ background: '#111' }}>7. Cyber Neon Frame</option>
-                      <option value="stars" style={{ background: '#111' }}>8. Deep Starfield</option>
-                      <option value="flare" style={{ background: '#111' }}>9. Solar Flare Light</option>
-                      <option value="none" style={{ background: '#111' }}>10. Clean Minimal (None)</option>
-                    </select>
-                  </div>
-
-                  {/* SPIDER / SLIDERS CONTROLS */}
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: 'rgba(255,255,255,0.03)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 600, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Sliders size={14} /> Spider Controls
-                    </div>
-
-                    <label style={{ fontSize: '12px', color: '#86868b', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      Effect Intensity: {effectIntensity}%
-                      <input 
-                        type="range" min="10" max="100" value={effectIntensity} 
-                        onChange={(e) => setEffectIntensity(Number(e.target.value))} 
-                        style={{ accentColor: '#38bdf8', cursor: 'pointer' }} 
-                      />
-                    </label>
-
-                    <label style={{ fontSize: '12px', color: '#86868b', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                      Effect Scale / Spread: {effectScale}%
-                      <input 
-                        type="range" min="10" max="100" value={effectScale} 
-                        onChange={(e) => setEffectScale(Number(e.target.value))} 
-                        style={{ accentColor: '#38bdf8', cursor: 'pointer' }} 
-                      />
-                    </label>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'draw' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                  <label style={{ fontSize: '12px', color: '#86868b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    Brush Color
-                    <input type="color" value={brushColor} onChange={(e) => setBrushColor(e.target.value)} style={{ width: '32px', height: '32px', borderRadius: '50%', border: 'none', cursor: 'pointer' }} />
-                  </label>
-
-                  <label style={{ fontSize: '12px', color: '#86868b', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    Brush Size ({brushSize}px)
-                    <input type="range" min="4" max="80" value={brushSize} onChange={(e) => setBrushSize(Number(e.target.value))} style={{ accentColor: '#38bdf8' }} />
-                  </label>
-                </div>
-              )}
-
-            </aside>
-
-            <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', background: 'radial-gradient(circle at center, rgba(30, 30, 35, 1) 0%, rgba(0,0,0,1) 100%)', position: 'relative' }}>
-              <div 
-                style={{
-                  position: 'relative', maxHeight: '75vh', aspectRatio: selectedDevice.aspect,
-                  borderRadius: selectedDevice.type === 'phone' ? '48px' : selectedDevice.type === 'tablet' ? '28px' : '16px',
-                  border: '8px solid #27272a', boxShadow: '0 25px 80px rgba(0, 0, 0, 0.9), 0 0 40px rgba(56, 189, 248, 0.1)',
-                  overflow: 'hidden', background: '#000000'
-                }}
-              >
-                {selectedDevice.type === 'phone' && (
-                  <div style={{ position: 'absolute', top: '12px', left: '50%', transform: 'translateX(-50%)', width: '90px', height: '24px', background: '#000000', borderRadius: '20px', zIndex: 20 }} />
-                )}
-                <canvas
-                  ref={canvasRef}
-                  onMouseDown={startDrawing}
-                  onMouseMove={draw}
-                  onMouseUp={stopDrawing}
-                  onMouseLeave={stopDrawing}
-                  onTouchStart={(e) => startDrawing(e.touches[0])}
-                  onTouchMove={(e) => draw(e.touches[0])}
-                  onTouchEnd={stopDrawing}
-                  style={{ width: '100%', height: '100%', display: 'block', cursor: activeTab === 'draw' ? 'crosshair' : 'default', touchAction: 'none' }}
-                />
-              </div>
-            </main>
-
-          </div>
-        </div>
-      )}
-
-    </div>
-  );
-}
+                      display: 'flex', alignItems: 'center', gap:
