@@ -133,9 +133,40 @@ export default function App() {
             onClick={clearCanvas} 
             className="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg text-sm flex items-center gap-1.5 transition border border-slate-700"
           >
-            <RefreshCw size5={15} /> Pulisci
+            <RefreshCw size={15} /> Pulisci
           </button>
 
           <button 
             onClick={downloadWallpaper} 
-            className="bg-sky-500 hover:bg-sky-400 text-slate
+            className="bg-sky-500 hover:bg-sky-400 text-slate-950 font-semibold px-4 py-2 rounded-lg text-sm flex items-center gap-1.5 transition"
+          >
+            <Download size={16} /> Salva Sfondo
+          </button>
+        </div>
+      </header>
+
+      {/* Area Workspace / Anteprima Canvas */}
+      <main className="flex-1 flex items-center justify-center p-4 overflow-hidden bg-slate-950">
+        <div 
+          className="relative shadow-2xl rounded-2xl overflow-hidden border-4 border-slate-800 bg-black flex items-center justify-center max-h-[75vh]"
+          style={{
+            aspectRatio: `${selectedDevice.width} / ${selectedDevice.height}`,
+            maxHeight: '70vh'
+          }}
+        >
+          <canvas
+            ref={canvasRef}
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+            onTouchStart={(e) => startDrawing(e.touches[0])}
+            onTouchMove={(e) => draw(e.touches[0])}
+            onTouchEnd={stopDrawing}
+            className="w-full h-full object-contain cursor-crosshair touch-none"
+          />
+        </div>
+      </main>
+    </div>
+  );
+}
